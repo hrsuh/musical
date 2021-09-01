@@ -58,7 +58,7 @@
 ### MSAEz 로 모델링한 이벤트스토밍 결과:
 
 
-![image](https://user-images.githubusercontent.com/87048623/129997418-3f552911-41ec-4ff9-9e4a-97fee47c54cb.png)
+![image](https://user-images.githubusercontent.com/87048550/131690768-6f4025f4-c3c9-48d6-aca1-d779db07970a.png)
 
 
 1. order의 주문, reservation의 예약과 취소, payment의 결제, customer의 mypage 등은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌(바운디드 컨텍스트)
