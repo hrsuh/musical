@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer
+  namespace: musical
+  labels:
+    app: customer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+    spec:
+      containers:
+        - name: customer
+          image: 496278789073.dkr.ecr.ap-northeast-2.amazonaws.com/hotelonel2-customer:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: my-password
+                  key: password
+            - name: DATA1
+              valueFrom:
+                configMapKeyRef:
+                  name: musicalcm
+                  key: text1
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5

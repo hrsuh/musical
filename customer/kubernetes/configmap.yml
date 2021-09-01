@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: musicalcm
+  namespace: musical
+data:
+  text1: musical_Customer
+  text2: Welcomes You
+  company: musical_Customer Technology Pct. Ltd.
