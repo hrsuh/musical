@@ -646,14 +646,22 @@ kubectl describe pod/customer-8498ff5687-5tt7t
 
 
 
-## 무정지 재배포
+## 무정지 재배포 (READINESS)
 
-* 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
+```
+# seige 로 배포작업 직전에 워크로드를 모니터링 함.
 
-- seige 로 배포작업 직전에 워크로드를 모니터링 함.
+siege -c30 -t30s -v http://customer:8080/mypages
+
+# customer (mypages) 재배포
+kubectl aoply -f delployment.yml
+
 ```
-siege -v -c100 -t60S -r10 --content-type "application/json" 'http://user01-order-test:8080/paymentHistories'
-```
+
+![image](https://user-images.githubusercontent.com/87048550/131870905-2eb28f75-6b9c-4aff-811c-775db76ef0d4.png)
+
+
+
 ![image](https://user-images.githubusercontent.com/87048623/130171580-b34cd2e2-9166-49b5-b3fd-902a6f212a14.png)
 
 
