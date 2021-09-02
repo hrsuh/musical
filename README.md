@@ -107,10 +107,10 @@ mvn spring-boot:run
 cd musical/reservation
 mvn spring-boot:run 
 
-cd payment
+cd musical/payment
 mvn spring-boot:run  
 
-cd customer
+cd musical/customer
 mvn spring-boot:run 
 ```
 
@@ -191,9 +191,6 @@ http localhost:8081/orders name=Lena seatType=vip cardNo=123 guest=2
 http localhost:8082/reservations orderId=3 status="confirmed"
 
 ```
-![image](https://user-images.githubusercontent.com/87048623/129999165-c8f5fb73-59d7-4898-a2f5-cb47fbe2fbeb.png)
-![image](https://user-images.githubusercontent.com/87048623/129999197-63d85159-5847-48af-a02c-9aac3b9e2864.png)
-
 ![image](https://user-images.githubusercontent.com/87048550/131804747-f0aeae5d-2151-4732-a6ac-9afb17a95832.png)
 ![image](https://user-images.githubusercontent.com/87048550/131804970-3f406d02-de41-45a5-90ef-22e4ca5897ed.png)
 
