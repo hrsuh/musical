@@ -506,8 +506,68 @@ server:
 
 각 구현체들은 각자의 source repository 에 구성되었고, Docker 빌드 및 이미지 Push, deployment.yml, service.yml 통해 배포한다.
 
-![image](https://user-images.githubusercontent.com/87048623/130062432-1e7570a7-79ff-4d79-a774-6ac6af262baa.png)
 
+
+```
+# ECR 생성 및 이미지 Push
+docker build -t 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-gateway:v1 .
+docker push 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-gateway:v1
+```
+```
+# (gateway) deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  labels:
+    app: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-gateway:v1
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8080
+```
+```
+# (gateway) service.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  labels:
+    app: gateway 
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: gateway 
+    
+```
+
+```
+# Deploymeny.yml, Service.yml 파일 실행
+kubectl apply -f deployment.yml
+kubectl apply -f service.yml
+
+# 배포 상태 확인
+kubectl get all
+
+```
+![image](https://user-images.githubusercontent.com/87048550/131838248-41cadb3f-55a2-4b83-9bc6-1cb13676920a.png)
 
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
