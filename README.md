@@ -201,9 +201,10 @@ http localhost:8082/reservations orderId=3 status="confirmed"
 
 ```
 # 주문 상태 확인
-http localhost:8084/mypages/1
+http localhost:8084/mypages/7
 ```
-![image](https://user-images.githubusercontent.com/87048623/129999240-6dafc1c9-0bca-4a43-8cb3-a98071a319fb.png)
+![image](https://user-images.githubusercontent.com/87048550/131806598-c15597d7-3472-44cf-b267-6c9c61ec0f89.png)
+
 
 
 ## 폴리글랏 퍼시스턴스
