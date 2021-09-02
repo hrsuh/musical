@@ -296,20 +296,20 @@ public interface PaymentHistoryService {
 # 결제 (payment) 서비스를 잠시 내려놓음 (ctrl+c)
 
 #주문처리 #Fail
-http localhost:8081/orders name=kim seatType=bclass  
+http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
 
 ```
-![image](https://user-images.githubusercontent.com/87048623/129999620-a66e42bc-0dd6-412c-903e-7175fd590d1d.png)
+![image](https://user-images.githubusercontent.com/87048550/131830721-0c3b16ec-378a-44bd-a59d-fd5421441cdd.png)
 
 ```
 #결제서비스 재기동
-cd /home/project/team/musical/payment
+cd musical/payment
 mvn spring-boot:run
 
 #주문처리 #Success
-http localhost:8081/orders name=kim seatType=bclass 
-```
-![image](https://user-images.githubusercontent.com/87048623/129999773-53cdeb37-afd3-4e05-bd7a-9aea95d1be21.png)
+http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
+
+![image](https://user-images.githubusercontent.com/87048550/131830915-0298d335-6db2-48fa-8b18-d3503f0f9f16.png)
 
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
@@ -372,7 +372,7 @@ public class PolicyHandler{
 }
 ```
 
-reservation 시스템은 order/payment와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 호텔 시스템이 유지보수로 인해 잠시 내려간 상태라도 예약 주문을 받는데 문제가 없다.
+reservation 시스템은 order/payment와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 좌석 예약 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다.
 
 ```
 # 예약 서비스 (reservation) 를 잠시 내려놓음 (ctrl+c)
