@@ -703,35 +703,46 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          args:
+          - /bin/sh
+          - -c
+          - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600
           livenessProbe:
-            httpGet:
-              path: '/actuator/health'
-              port: 8080
+            exec:
+              command:
+              - cat
+              - /tmp/healthy
             initialDelaySeconds: 120
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 5
 ```
+
 가동 중인 Pod 확인
 
 ```
 kubectl get pod
 ```
-![image](https://user-images.githubusercontent.com/87048550/131846362-bbe2196e-d435-447f-8b08-18d4d6535291.png)
+![image](https://user-images.githubusercontent.com/87048550/131852472-34329577-63d2-4965-9871-1a06f955ee49.png)
 
-정상 작동 여부 확인을 위해 기존 order pod를 삭제함.
+정상 작동 여부 확인을 위해 deployment2.yml 재배포.
 
 ```
-kubectl delete pod/order-878668cdc-8zk7q
+kubectl apply -f deployment2.yml
 ```
-![image](https://user-images.githubusercontent.com/87048550/131846715-0f04f19c-bf5f-4664-a7d9-57d75aa8d076.png)
 
+![image](https://user-images.githubusercontent.com/87048550/131852666-f1e9300a-a5f5-4cfd-9184-a8298df62f40.png)
 
-정상적으로 재생성 되는 것 확인
+30 초 후 pod 상태 Unhealthy > Killing 확인
+
+```
+kubectl describe pod/order-748c8666bf-t6ts7
+```
+![image](https://user-images.githubusercontent.com/87048550/131853447-760f37e8-aeb7-4bdd-8a5f-ef1edffd9b0e.png)
+
+가동 중인 Pod 재 확인 : Restart 1 확인
 
 ```
 kubectl get pod
 ```
-
-![image](https://user-images.githubusercontent.com/87048550/131846957-1bc274ef-8503-4b0e-9ec4-47121f53b5e1.png)
-
+![image](https://user-images.githubusercontent.com/87048550/131853659-3b233361-7ac8-4715-824c-4ff01eaab72f.png)
