@@ -389,18 +389,17 @@ http localhost:8081/orders name=Jin seatType=cclass cardNo=135 guest=1  #Success
 # 예약상태 확인
 http localhost:8084/mypages/4  # 예약상태 안바뀜 확인     
 ```
-![image](https://user-images.githubusercontent.com/87048623/130000011-0ea13f64-81c3-4ccc-bc53-94f97fb8d9ab.png)
+![image](https://user-images.githubusercontent.com/87048550/131832660-b6d945cd-0a45-4d3b-9ef5-d6c0e8f15d83.png)
 
 ```
 # reservation 서비스 기동
-cd /home/project/team/musical/reservation
+cd musical/reservation
 mvn spring-boot:run 
 
 # 예약상태 확인
 http localhost:8084/mypages/4   # 예약상태가 "Reservation Complete"로 확인
 ```
-![image](https://user-images.githubusercontent.com/87048623/130000098-fb46ed65-62d2-4ae5-93d5-1b92c72c0b3a.png)
-
+![image](https://user-images.githubusercontent.com/87048550/131832791-04576034-9cb7-452b-a172-7e332f2da38f.png)
 
 ## API 게이트웨이(gateway)
 
@@ -412,9 +411,9 @@ cd gateway
 mvn spring-boot:run
 
 # API gateway를 통한 예약 주문
-http localhost:8080/orders name=jason seatType=vip
+http localhost:8080/orders name=Ryung seatType=vvip cardNo=987 guest=2 
 ```
-![image](https://user-images.githubusercontent.com/87048623/130000185-6ecac4c7-1f74-4c2e-8c61-3e1f152f42ac.png)
+![image](https://user-images.githubusercontent.com/87048550/131833504-55db412d-601a-4926-b842-e25891afb9f1.png)
 
 ```
 application.yml
@@ -505,7 +504,7 @@ server:
 
 ## CI/CD 설정
 
-각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 AWS를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 cloudbuild.yml 에 포함되었다.
+각 구현체들은 각자의 source repository 에 구성되었고, Docker 빌드 및 이미지 Push, deployment.yml, service.yml 통해 배포한다.
 
 ![image](https://user-images.githubusercontent.com/87048623/130062432-1e7570a7-79ff-4d79-a774-6ac6af262baa.png)
 
