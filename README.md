@@ -308,6 +308,7 @@ mvn spring-boot:run
 
 #주문처리 #Success
 http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
+```
 
 ![image](https://user-images.githubusercontent.com/87048550/131830915-0298d335-6db2-48fa-8b18-d3503f0f9f16.png)
 
