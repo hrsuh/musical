@@ -1,5 +1,5 @@
 # musical
-# 공연 예약
+# 공연 좌석 예매
 
 
 # Table of contents
