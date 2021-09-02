@@ -661,6 +661,47 @@ kubectl aoply -f delployment.yml
 ![image](https://user-images.githubusercontent.com/87048550/131870905-2eb28f75-6b9c-4aff-811c-775db76ef0d4.png)
 
 ```
+# (customer) deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer
+  labels:
+    app: customer
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+    spec:
+      containers:
+        - name: customer
+          image: 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-customer:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATA1
+              valueFrom:
+                configMapKeyRef:
+                  name: musicalcm
+                  key: text2
+          readinessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+
+```
+
+```
 # seige 로 배포작업 직전에 워크로드를 모니터링 함.
 
 siege -c30 -t30s -v http://customer:8080/mypages
@@ -670,23 +711,10 @@ kubectl aoply -f delployment.yml
 
 ```
 
-![image](https://user-images.githubusercontent.com/87048623/130171760-6f06612b-2cc0-46e4-a683-e7d557019daf.png)
-
-
-- CI/CD CodeBuild 를 통한 재배포 
-
-![image](https://user-images.githubusercontent.com/87048623/130171968-d2f0ad7e-d7bd-425a-b20e-4d21b1b20e49.png)
-
-
-- payment 서비스 재배포 시 새로운 서비스가 완전히 구동되기 전까지 기존 서비스가 구동된다. 
-
-![image](https://user-images.githubusercontent.com/87048623/130170983-ca76b3db-fea8-466c-b3e4-b468d4339836.png)
-
 
 - 배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
 
-![image](https://user-images.githubusercontent.com/87048623/130171606-38c3f1b2-ec20-40d5-b0b1-92b3ffd1b425.png)
-
+![image](https://user-images.githubusercontent.com/87048550/131874156-6377cd54-db09-4dc2-a3c4-2ae3ef3f70dc.png)
 
 # Liveness
 
