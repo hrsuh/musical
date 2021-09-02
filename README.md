@@ -679,22 +679,59 @@ siege -v -c100 -t60S -r10 --content-type "application/json" 'http://user01-order
 
 # Liveness
 
-Payment 배포시 yaml 파일내 Liveness 설정되어 있음.
+(Order) deployment.yml 파일 내 Liveness 설정되어 있음.
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  labels:
+    app: order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+        - name: order
+          image: 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-order:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: '/actuator/health'
+              port: 8080
+            initialDelaySeconds: 120
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
+```
+가동 중인 Pod 확인
 
-![image](https://user-images.githubusercontent.com/87048623/130187084-089333e5-dcc9-420f-98f9-8542b7b2e0c7.png)
+```
+kubectl get pod
+```
+![image](https://user-images.githubusercontent.com/87048550/131846362-bbe2196e-d435-447f-8b08-18d4d6535291.png)
 
+정상 작동 여부 확인을 위해 기존 order pod를 삭제함.
 
-
-![image](https://user-images.githubusercontent.com/87048623/130185233-aba544d2-3ad5-402b-b3ae-6166b9138c4b.png)
-
-
-정상 작동 여부 확인을 위해 기존 payment pod를 삭제함.
-
-![image](https://user-images.githubusercontent.com/87048623/130186240-c93e8174-fbe1-4c42-af75-9175fa1e1aef.png)
+```
+kubectl delete pod/order-878668cdc-8zk7q
+```
+![image](https://user-images.githubusercontent.com/87048550/131846715-0f04f19c-bf5f-4664-a7d9-57d75aa8d076.png)
 
 
 정상적으로 재생성 되는 것 확인
 
-![image](https://user-images.githubusercontent.com/87048623/130186270-9930963b-c4f0-477b-9526-73b3f0969f17.png)
+```
+kubectl get pod
+```
 
-![image](https://user-images.githubusercontent.com/87048623/130186300-6c9934f3-70e0-41b3-82e9-85abd76135cd.png)
+![image](https://user-images.githubusercontent.com/87048550/131846957-1bc274ef-8503-4b0e-9ec4-47121f53b5e1.png)
+
