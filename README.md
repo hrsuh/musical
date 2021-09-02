@@ -572,16 +572,40 @@ kubectl get all
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
 
+```
+# 서킷 브레이킹 적용 전 siege 부하테스트
+siege -c10 -t10s -v --content-type "application/json" 'http://order:8080/orders POST {"name": "Tom", "seatType": "vip"}'
 
+```
+![image](https://user-images.githubusercontent.com/87048550/131883301-fb9cadce-f40b-45ab-a6a5-9cae311005d1.png)
 
-### 부하테스트
+```
+# 서킷 브레이킹 적용 
+# (order) destinationRule.yml 생성
 
-![image](https://user-images.githubusercontent.com/87048623/130191301-54b272bf-6bbc-4287-8ade-e73ae575d0ce.png)
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: order
+spec:
+  host: order
+  trafficPolicy:
+    connectionPool:
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
 
-![image](https://user-images.githubusercontent.com/87048623/130191372-33aa0803-80cd-449a-bfbb-029c1aa0585f.png)
+```
 
-![image](https://user-images.githubusercontent.com/87048623/130191449-a48f375a-318f-4df8-bc79-dcfc29be4e40.png)
+```
+# destinationRule.yml 배포
+kubectl apply -f destinationRule.yml
 
+# 서킷 브레이킹 적용 후 siege 부하테스트
+siege -c10 -t10s -v --content-type "application/json" 'http://order:8080/orders POST {"name": "Tom", "seatType": "vip"}'
+
+```
+![image](https://user-images.githubusercontent.com/87048550/131883782-0e4651a8-c523-435b-aa06-220879f79288.png)
 
 
 ## ConfigMap
