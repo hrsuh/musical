@@ -660,12 +660,15 @@ kubectl aoply -f delployment.yml
 
 ![image](https://user-images.githubusercontent.com/87048550/131870905-2eb28f75-6b9c-4aff-811c-775db76ef0d4.png)
 
+```
+# seige 로 배포작업 직전에 워크로드를 모니터링 함.
 
+siege -c30 -t30s -v http://customer:8080/mypages
 
-![image](https://user-images.githubusercontent.com/87048623/130171580-b34cd2e2-9166-49b5-b3fd-902a6f212a14.png)
+# customer (mypages) 재배포
+kubectl aoply -f delployment.yml
 
-
-- payment 서비스의 yaml 파일에 Readiness 설정되어 있음
+```
 
 ![image](https://user-images.githubusercontent.com/87048623/130171760-6f06612b-2cc0-46e4-a683-e7d557019daf.png)
 
