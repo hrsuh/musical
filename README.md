@@ -4,7 +4,7 @@
 
 # Table of contents
 
-- [공연 예약](#---)
+- [공연 예매](#---)
   - [서비스 시나리오](#시나리오)
   - [분석/설계](#분석-설계)
   - [구현:](#구현)
@@ -26,16 +26,16 @@
 
 ## 서비스 시나리오
 
-공연 예약 시스템에서 요구하는 기능/비기능 요구사항은 다음과 같습니다. 사용자가 예약과 함께 결제를 진행하고 난 후 공연예약이 완료되는 프로세스입니다. 이 과정에 대해서 고객은 진행 상황을 MyPage를 통해 확인할 수 있습니다.
+공연 좌석 예약 시스템에서 요구하는 기능/비기능 요구사항은 다음과 같습니다. 사용자가 예약과 함께 결제를 진행하고 난 후 공연예약이 완료되는 프로세스입니다. 이 과정에 대해서 고객은 진행 상황을 MyPage를 통해 확인할 수 있습니다.
 
 #### 기능적 요구사항
 
-1. 고객이 원하는 공연을 선택 하여 예약한다.
+1. 고객이 원하는 좌석을 선택 하여 예약한다.
 1. 고객이 결제 한다.
 1. 예약이 신청 되면 예약 신청 내역이 극단에 전달 된다.
 1. 극단이 확인 하여 예약을 확정 한다.
 1. 고객이 예약 신청을 취소할 수 있다.
-1. 예약이 취소 되면 공연 예약이 취소 된다.
+1. 예약이 취소 되면 공연 좌석 예약이 취소 된다.
 1. 고객이 예약 진행 상황을 조회 한다.
 1. 고객이 예약 취소를 하면 예약 정보는 삭제 상태로 업데이트 된다.
 
@@ -44,7 +44,7 @@
 1. 트랜잭션
    1. 결제가 되지 않은 예약건은 아예 공연 예약 신청이 되지 않아야 한다. Sync 호출
 1. 장애격리
-   1. 공연관리 기능이 수행 되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다. Async (event-driven), Eventual Consistency
+   1. 좌석관리 기능이 수행 되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다. Async (event-driven), Eventual Consistency
    1. 결제 시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도 한다. Circuit breaker, fallback
 1. 성능
    1. 고객이 예약 확인 상태를 마이페이지에서 확인할 수 있어야 한다. CQRS
@@ -69,12 +69,12 @@
 
 
 ### 기능 요구사항을 커버하는지 검증
-1. 고객이 원하는 공연을 선택 하여 예약한다.(OK)
+1. 고객이 원하는 좌석을 선택 하여 예약한다.(OK)
 1. 고객이 결제 한다.(OK)
 1. 예약이 신청 되면 예약 신청 내역이 극단에 전달 된다.(OK)
 1. 극단이 확인 하여 예약을 확정 한다.(OK)
 1. 고객이 예약 신청을 취소할 수 있다.(OK)
-1. 예약이 취소 되면 공연 예약이 취소 된다.(OK)
+1. 예약이 취소 되면 공연 좌석 예약이 취소 된다.(OK)
 1. 고객이 예약 진행 상황을 조회 한다.(OK)
 1. 고객이 예약 취소를 하면 예약 정보는 삭제 상태로 업데이트 된다.(OK)
 
@@ -83,7 +83,7 @@
    - 결제가 되지 않은 예약건은 아예 공연 예약 신청이 되지 않아야 한다. Sync 호출 (OK)
    - 주문 완료 시 결제 처리에 대해서는 Request-Response 방식 처리
 1. 장애격리
-   - 공연관리 기능이 수행 되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다.(OK)
+   - 좌석관리 기능이 수행 되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다.(OK)
    - Eventual Consistency 방식으로 트랜잭션 처리함. (PUB/Sub)
 
 
@@ -101,16 +101,16 @@
 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8084 이다)
 
 ```
-cd /home/project/team/musical/order
+cd musical/order
 mvn spring-boot:run
 
-cd /home/project/team/musical/reservation
+cd musical/reservation
 mvn spring-boot:run 
 
-cd /home/project/team/musical/payment
+cd payment
 mvn spring-boot:run  
 
-cd /home/project/team/musical/customer
+cd customer
 mvn spring-boot:run 
 ```
 
@@ -185,14 +185,17 @@ public interface PaymentHistoryRepository extends PagingAndSortingRepository<Pay
 - 적용 후 REST API 의 테스트
 ```
 # order 서비스의 주문처리
-http localhost:8081/orders name=Lee seatType=vip
+http localhost:8081/orders name=Lena seatType=vip cardNo=123 guest=2
 
 # reservation 서비스의 예약처리
-http localhost:8082/reservations orderId=1 status="confirmed"
+http localhost:8082/reservations orderId=3 status="confirmed"
 
 ```
 ![image](https://user-images.githubusercontent.com/87048623/129999165-c8f5fb73-59d7-4898-a2f5-cb47fbe2fbeb.png)
 ![image](https://user-images.githubusercontent.com/87048623/129999197-63d85159-5847-48af-a02c-9aac3b9e2864.png)
+
+![image](https://user-images.githubusercontent.com/87048550/131804747-f0aeae5d-2151-4732-a6ac-9afb17a95832.png)
+![image](https://user-images.githubusercontent.com/87048550/131804970-3f406d02-de41-45a5-90ef-22e4ca5897ed.png)
 
 
 ## CQRS
