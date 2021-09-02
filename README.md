@@ -315,7 +315,7 @@ http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
-결제가 이루어진 후에 호텔 시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 호텔 시스템의 처리를 위하여 결제주문이 블로킹 되지 않도록 처리한다.
+결제가 이루어진 후에 좌석 시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 결제주문이 블로킹 되지 않도록 처리한다.
  
 - 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
@@ -379,9 +379,11 @@ reservation 시스템은 order/payment와 완전히 분리되어있으며, 이�
 # 예약 서비스 (reservation) 를 잠시 내려놓음 (ctrl+c)
 
 # 주문 처리
-http localhost:8081/orders name=Yoo seatType=standard   #Success
+http localhost:8081/orders name=Jin seatType=cclass cardNo=135 guest=1  #Success
 ```
-![image](https://user-images.githubusercontent.com/87048623/129999950-ca9b0a5c-1b87-4eff-af3c-8b7fc4651ad0.png)
+
+![image](https://user-images.githubusercontent.com/87048550/131832179-cc2b1bb7-6cd4-40c0-8554-8dd2408f0609.png)
+
 
 ```
 # 예약상태 확인
