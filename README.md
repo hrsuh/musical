@@ -559,7 +559,7 @@ spec:
 ```
 
 ```
-# Deploymeny.yml, Service.yml 파일 실행
+# deploymeny.yml, service.yml 파일 실행
 kubectl apply -f deployment.yml
 kubectl apply -f service.yml
 
@@ -588,24 +588,61 @@ kubectl get all
 
 Customer 서비스의 configMap 설정
 
--configmap.yml
 
-![image](https://user-images.githubusercontent.com/87048623/130187231-4ff38fc9-6958-4a83-868c-edb4849de0f5.png)
+```
+# (customer) configmap.yml
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: musicalcm
+data:
+  text1: musical_Customer
+  text2: Welcomes You
+  company: musical_Customer Technology Pct. Ltd.
 
-- deployment.yml
+```
 
-![image](https://user-images.githubusercontent.com/87048623/130187320-156a1c4e-abb2-445f-b905-bb7bd4304e6e.png)
+```
+# (customer) deployment.yml
 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer
+  labels:
+    app: customer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+    spec:
+      containers:
+        - name: customer
+          image: 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-customer:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATA1
+              valueFrom:
+                configMapKeyRef:
+                  name: musicalcm
+                  key: text1
+
+```
 
 시스템별로 또는 운영중에 동적으로 변경 가능성이 있는 설정들을 ConfigMap을 사용하여 관리합니다.
 
-kubectl describe pod/customer-55bcc4b5c6-mrswl
-
-![image](https://user-images.githubusercontent.com/87048623/130187675-48fa9866-2a3f-4c6f-8c12-7511040fa928.png)
-
-
-
+```
+kubectl describe pod/customer-8498ff5687-5tt7t
+```
+![image](https://user-images.githubusercontent.com/87048550/131842676-597e763d-1a12-4e6a-8452-2b4bc3c3b4d9.png)
 
 
 
