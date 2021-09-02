@@ -230,16 +230,15 @@ http localhost:8084/mypages/7
 
 
 # 변경/재기동 후 주문 처리
-http localhost:8081/orders name=Park seatType=aclass
+http localhost:8081/orders name=Hyun seatType=aclass cardNo=456 guest=1
 
 # 저장이 잘 되었는지 조회
 http localhost:8084/mypages/1
 
 ```
 
-![image](https://user-images.githubusercontent.com/87048623/129999342-39d60491-b7e9-4a8c-a281-4c335deb3e4d.png)
-![image](https://user-images.githubusercontent.com/87048623/129999387-8f1ab984-21a1-4d0c-af5c-dd77c9f88f3c.png)
-
+![image](https://user-images.githubusercontent.com/87048550/131807519-2969f81d-649a-4ae2-ad7f-52d3550b6464.png)
+![image](https://user-images.githubusercontent.com/87048550/131807647-c361bcc1-74f1-48b4-9860-524e57616404.png)
 
 
 ## 동기식 호출 과 Fallback 처리
