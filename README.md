@@ -237,22 +237,10 @@ http localhost:8084/mypages/7
 
 폴리그랏 퍼시스턴스 요건을 만족하기 위해 customer 서비스의 DB를 기존 h2를 hsqldb로 변경
 
-![image](https://user-images.githubusercontent.com/87048623/129825717-ba8ae72a-5fab-4f48-a55d-6b8c71e1b939.png)
+![image](https://user-images.githubusercontent.com/87048550/131937320-999ab6ce-e984-4816-ad5d-4266f57e2619.png)
 
 
 ```
-<!--		<dependency>-->
-<!--			<groupId>com.h2database</groupId>-->
-<!--			<artifactId>h2</artifactId>-->
-<!--			<scope>runtime</scope>-->
-<!--		</dependency>-->
-
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
 # 변경/재기동 후 주문 처리
 http localhost:8081/orders name=Hyun seatType=aclass cardNo=456 guest=1
 
