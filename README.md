@@ -1,10 +1,9 @@
 # musical
-# 공연 좌석 예매
-
+# 공연 좌석 예약
 
 # Table of contents
 
-- [공연 예매](#---)
+- [좌석 예약](#---)
   - [서비스 시나리오](#시나리오)
   - [분석/설계](#분석-설계)
   - [구현:](#구현)
@@ -18,87 +17,68 @@
     - [Saga Pattern / 보상 트랜잭션](#SAGA-CQRS-동작-결과)
   - [운영](#운영)
     - [CI/CD 설정](#cicd-설정)
-    - [Self Healing](#Self-Healing)
     - [동기식 호출 / 서킷 브레이킹 / 장애격리](#동기식-호출--서킷-브레이킹--장애격리)
-    - [오토스케일 아웃](#오토스케일-아웃)
     - [무정지 재배포](#무정지-배포)
     - [ConfigMap / Secret](#Configmap)
+    - [Self Healing](#Self-Healing)
 
 ## 서비스 시나리오
 
-공연 좌석 예약 시스템에서 요구하는 기능/비기능 요구사항은 다음과 같습니다. 사용자가 예약과 함께 결제를 진행하고 난 후 공연예약이 완료되는 프로세스입니다. 이 과정에 대해서 고객은 진행 상황을 MyPage를 통해 확인할 수 있습니다.
+좌석 예약 시스템에서 요구하는 기능/비기능 요구사항은 다음과 같습니다. 사용자가 예매과 함께 결제를 진행하고 난 후 공연 좌석 예약이 완료되는 프로세스입니다. 이 과정에 대해서 고객은 진행 상황을 MyPage를 통해 확인할 수 있습니다.
 
 #### 기능적 요구사항
 
-1. 고객이 원하는 좌석을 선택 하여 예약한다.
+1. 고객이 원하는 좌석을 선택 하여 예매한다.
 1. 고객이 결제 한다.
-1. 예약이 신청 되면 예약 신청 내역이 극단에 전달 된다.
-1. 극단이 확인 하여 예약을 확정 한다.
-1. 고객이 예약 신청을 취소할 수 있다.
-1. 예약이 취소 되면 공연 좌석 예약이 취소 된다.
+1. 결제가 완료되면 예약을 확정 한다.
+1. 고객이 예매를 취소할 수 있다.
+1. 예매가 취소 되면 공연 좌석 예약이 취소 된다.
 1. 고객이 예약 진행 상황을 조회 한다.
-1. 고객이 예약 취소를 하면 예약 정보는 삭제 상태로 업데이트 된다.
+1. 고객이 예매 취소를 하면 예약 정보는 삭제 상태로 업데이트 된다.
 
 #### 비기능적 요구사항
 
 1. 트랜잭션
-   1. 결제가 되지 않은 예약건은 아예 공연 예약 신청이 되지 않아야 한다. Sync 호출
+   1. 결제가 되지 않은 예매 건은 아예 좌석 예약 신청이 되지 않아야 한다. Sync 호출
 1. 장애격리
-   1. 좌석관리 기능이 수행 되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다. Async (event-driven), Eventual Consistency
+   1. 좌석 시스템 기능이 수행 되지 않더라도 예매는 365일 24시간 받을 수 있어야 한다. Async (event-driven), Eventual Consistency
    1. 결제 시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도 한다. Circuit breaker, fallback
 1. 성능
    1. 고객이 예약 확인 상태를 마이페이지에서 확인할 수 있어야 한다. CQRS
    
-
-
 # 분석 설계
 
 ## Event Storming
 
 ### MSAEz 로 모델링한 이벤트스토밍 결과:
 
-
 ![image](https://user-images.githubusercontent.com/87048550/131690768-6f4025f4-c3c9-48d6-aca1-d779db07970a.png)
 
-
-1. order의 주문, reservation의 예약과 취소, payment의 결제, customer의 mypage 등은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌(바운디드 컨텍스트)
+1. order의 예매, reservation의 예약과 취소, payment의 결제, customer의 mypage 등은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌(바운디드 컨텍스트)
 1. 도메인 서열 분리 
    - Core Domain:  order, reservation
    - Supporting Domain: customer
    - General Domain : payment
 
-
 ### 기능 요구사항을 커버하는지 검증
-1. 고객이 원하는 좌석을 선택 하여 예약한다.(OK)
+1. 고객이 원하는 좌석을 선택 하여 예매한다.(OK)
 1. 고객이 결제 한다.(OK)
-1. 예약이 신청 되면 예약 신청 내역이 극단에 전달 된다.(OK)
-1. 극단이 확인 하여 예약을 확정 한다.(OK)
-1. 고객이 예약 신청을 취소할 수 있다.(OK)
-1. 예약이 취소 되면 공연 좌석 예약이 취소 된다.(OK)
+1. 결제가 완료되면 예약을 확정 한다.(OK)
+1. 고객이 예매를 취소할 수 있다.(OK)
+1. 예매가 취소 되면 공연 좌석 예약이 취소 된다.(OK)
 1. 고객이 예약 진행 상황을 조회 한다.(OK)
-1. 고객이 예약 취소를 하면 예약 정보는 삭제 상태로 업데이트 된다.(OK)
+1. 고객이 예매 취소를 하면 예약 정보는 삭제 상태로 업데이트 된다.(OK)
 
 ### 비기능 요구사항을 커버하는지 검증
 1. 트랜잭션 
-   - 결제가 되지 않은 예약건은 아예 공연 예약 신청이 되지 않아야 한다. Sync 호출 (OK)
-   - 주문 완료 시 결제 처리에 대해서는 Request-Response 방식 처리
+   - 결제가 되지 않은 예매 건은 아예 좌석 예약 신청이 되지 않아야 한다. Sync 호출(OK)
+   - 예매 완료 시 결제 처리에 대해서는 Request-Response 방식 처리
 1. 장애격리
-   - 좌석관리 기능이 수행 되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다.(OK)
+   - 좌석 관리 기능이 수행 되지 않더라도 예매는 365일 24시간 받을 수 있어야 한다.(OK)
    - Eventual Consistency 방식으로 트랜잭션 처리함. (PUB/Sub)
 
-
-## 헥사고날 아키텍처 다이어그램 도출
-
-![image](https://user-images.githubusercontent.com/87048623/129824495-91852bae-0566-4a0c-8bf1-e864e0acc0eb.png)
-
-    - Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
-    - 호출관계에서 PubSub 과 Req/Resp 를 구분함
-    - 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
-
-
-
 # 구현
-분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8084 이다)
+분석/설계 단계에서 도출된 모델링에 맞춰 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8084 이다)
 
 ```
 cd musical/order
@@ -116,25 +96,56 @@ mvn spring-boot:run
 
 ## DDD 의 적용
 
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 paymentHistory 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
+- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다.
 
 ```
 package musical;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
+
+import musical.external.PaymentHistory;
+
 import java.util.List;
 
 @Entity
-@Table(name="PaymentHistory_table")
-public class PaymentHistory {
+@Table(name="Order_table")
+public class Order {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private Long orderId;
+    private String seatType;
     private Long cardNo;
+    private Integer guest;
+    private String name;
     private String status;
+
+    @PostPersist
+    public void onPostPersist(){
+        Ordered ordered = new Ordered();
+        BeanUtils.copyProperties(this, ordered);
+        ordered.publishAfterCommit();
+
+        PaymentHistory payment = new PaymentHistory();
+        System.out.println("this.id() : " + this.id);
+        payment.setOrderId(this.id);
+        payment.setStatus("Reservation OK");
+        OrderApplication.applicationContext.getBean(musical.external.PaymentHistoryService.class)
+            .pay(payment);
+
+    }
+
+    @PostUpdate
+    public void onPostUpdate(){
+    	System.out.println("Order Cancel  !!");
+        OrderCanceled orderCanceled = new OrderCanceled();
+        BeanUtils.copyProperties(this, orderCanceled);
+        orderCanceled.publishAfterCommit();
+
+
+    }
+
 
     public Long getId() {
         return id;
@@ -143,12 +154,12 @@ public class PaymentHistory {
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getOrderId() {
-        return orderId;
+    public String getSeatType() {
+        return seatType;
     }
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
+    public void setSeatType(String seatType) {
+        this.seatType = seatType;
     }
     public Long getCardNo() {
         return cardNo;
@@ -156,6 +167,20 @@ public class PaymentHistory {
 
     public void setCardNo(Long cardNo) {
         this.cardNo = cardNo;
+    }
+    public Integer getGuest() {
+        return guest;
+    }
+
+    public void setGuest(Integer guest) {
+        this.guest = guest;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     public String getStatus() {
         return status;
@@ -171,7 +196,8 @@ public class PaymentHistory {
 }
 ```
 
-- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
+- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다.
+
 ```
 package musical;
 
@@ -183,6 +209,7 @@ public interface PaymentHistoryRepository extends PagingAndSortingRepository<Pay
 ```
 
 - 적용 후 REST API 의 테스트
+
 ```
 # order 서비스의 주문처리
 http localhost:8081/orders name=Lena seatType=vip cardNo=123 guest=2
@@ -191,9 +218,9 @@ http localhost:8081/orders name=Lena seatType=vip cardNo=123 guest=2
 http localhost:8082/reservations orderId=3 status="confirmed"
 
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131804747-f0aeae5d-2151-4732-a6ac-9afb17a95832.png)
 ![image](https://user-images.githubusercontent.com/87048550/131804970-3f406d02-de41-45a5-90ef-22e4ca5897ed.png)
-
 
 ## CQRS
 
@@ -203,9 +230,8 @@ http localhost:8082/reservations orderId=3 status="confirmed"
 # 주문 상태 확인
 http localhost:8084/mypages/7
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131806598-c15597d7-3472-44cf-b267-6c9c61ec0f89.png)
-
-
 
 ## 폴리글랏 퍼시스턴스
 
@@ -227,8 +253,6 @@ http localhost:8084/mypages/7
 			<scope>runtime</scope>
 		</dependency>
 
-
-
 # 변경/재기동 후 주문 처리
 http localhost:8081/orders name=Hyun seatType=aclass cardNo=456 guest=1
 
@@ -243,10 +267,12 @@ http localhost:8084/mypages/1
 
 ## 동기식 호출 과 Fallback 처리
 
-분석단계에서의 조건 중 하나로 주문(order)->결제(payment) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+분석단계에서의 조건 중 하나로 예매(order)->결제(payment) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
 - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
+- 
 ```
+
 # (order) PaymentHistoryService.java
 
 package musical.external;
@@ -268,6 +294,7 @@ public interface PaymentHistoryService {
 ```
 
 - 주문을 받은 직후(@PostPersist) 결제를 요청하도록 처리
+
 ```
 # Order.java (Entity)
   
@@ -277,28 +304,26 @@ public interface PaymentHistoryService {
         BeanUtils.copyProperties(this, ordered);
         ordered.publishAfterCommit();
 
-        //Following code causes dependency to external APIs
-        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
-
-//        musical.external.PaymentHistory paymentHistory = new musical.external.PaymentHistory();
         PaymentHistory payment = new PaymentHistory();
         System.out.println("this.id() : " + this.id);
         payment.setOrderId(this.id);
         payment.setStatus("Reservation OK");
-        // mappings goes here
+ 
         OrderApplication.applicationContext.getBean(musical.external.PaymentHistoryService.class)
             .pay(payment);
 
 ```
 
-- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
+- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인.
+
 ```
-# 결제 (payment) 서비스를 잠시 내려놓음 (ctrl+c)
+# 결제 (payment) 서비스를 잠시 내려놓음
 
 #주문처리 #Fail
 http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
 
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131830721-0c3b16ec-378a-44bd-a59d-fd5421441cdd.png)
 
 ```
@@ -311,7 +336,6 @@ http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
 ```
 
 ![image](https://user-images.githubusercontent.com/87048550/131830915-0298d335-6db2-48fa-8b18-d3503f0f9f16.png)
-
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
@@ -344,7 +368,7 @@ public class PaymentHistory {
 
 ```
 
-- reservation 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다.
+- reservation 서비스에서는 결제 승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다.
 
 ```
 # PolicyHandler.java
@@ -376,7 +400,7 @@ public class PolicyHandler{
 reservation 시스템은 order/payment와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 좌석 예약 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다.
 
 ```
-# 예약 서비스 (reservation) 를 잠시 내려놓음 (ctrl+c)
+# 예약 서비스 (reservation) 를 잠시 내려놓음
 
 # 주문 처리
 http localhost:8081/orders name=Jin seatType=cclass cardNo=135 guest=1  #Success
@@ -384,11 +408,11 @@ http localhost:8081/orders name=Jin seatType=cclass cardNo=135 guest=1  #Success
 
 ![image](https://user-images.githubusercontent.com/87048550/131832179-cc2b1bb7-6cd4-40c0-8554-8dd2408f0609.png)
 
-
 ```
 # 예약상태 확인
 http localhost:8084/mypages/4  # 예약상태 안바뀜 확인     
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131832660-b6d945cd-0a45-4d3b-9ef5-d6c0e8f15d83.png)
 
 ```
@@ -399,6 +423,7 @@ mvn spring-boot:run
 # 예약상태 확인
 http localhost:8084/mypages/4   # 예약상태가 "Reservation Complete"로 확인
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131832791-04576034-9cb7-452b-a172-7e332f2da38f.png)
 
 ## API 게이트웨이(gateway)
@@ -413,6 +438,7 @@ mvn spring-boot:run
 # API gateway를 통한 예약 주문
 http localhost:8080/orders name=Ryung seatType=vvip cardNo=987 guest=2 
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131833504-55db412d-601a-4926-b842-e25891afb9f1.png)
 
 ```
@@ -499,20 +525,18 @@ server:
 
 ```
 
-
 # 운영
 
 ## CI/CD 설정
 
-각 구현체들은 각자의 source repository 에 구성되었고, Docker 빌드 및 이미지 Push, deployment.yml, service.yml 통해 배포한다.
-
-
+각 구현체들은 각자의 source repository 에 구성되었고, Deploy 방식으로 Docker 빌드 및 이미지 Push, deployment.yml, service.yml 통해 배포한다.
 
 ```
 # ECR 생성 및 이미지 Push
 docker build -t 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-gateway:v1 .
 docker push 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user07-gateway:v1
 ```
+
 ```
 # (gateway) deployment.yml
 
@@ -569,7 +593,6 @@ kubectl get all
 ```
 ![image](https://user-images.githubusercontent.com/87048550/131838248-41cadb3f-55a2-4b83-9bc6-1cb13676920a.png)
 
-
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
 
 ```
@@ -611,7 +634,6 @@ siege -c10 -t10s -v --content-type "application/json" 'http://order:8080/orders 
 ## ConfigMap
 
 Customer 서비스의 configMap 설정
-
 
 ```
 # (customer) configmap.yml
@@ -666,9 +688,8 @@ spec:
 ```
 kubectl describe pod/customer-8498ff5687-5tt7t
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131842676-597e763d-1a12-4e6a-8452-2b4bc3c3b4d9.png)
-
-
 
 ## 무정지 재배포 (READINESS)
 
@@ -735,7 +756,6 @@ kubectl aoply -f delployment.yml
 
 ```
 
-
 - 배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
 
 ![image](https://user-images.githubusercontent.com/87048550/131874156-6377cd54-db09-4dc2-a3c4-2ae3ef3f70dc.png)
@@ -743,6 +763,7 @@ kubectl aoply -f delployment.yml
 # Liveness
 
 (Order) deployment.yml 파일 내 Liveness 설정되어 있음.
+
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -801,6 +822,7 @@ kubectl apply -f deployment2.yml
 ```
 kubectl describe pod/order-748c8666bf-t6ts7
 ```
+
 ![image](https://user-images.githubusercontent.com/87048550/131853447-760f37e8-aeb7-4bdd-8a5f-ef1edffd9b0e.png)
 
 가동 중인 Pod 재 확인 : Restart 1 확인
