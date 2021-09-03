@@ -307,7 +307,7 @@ public interface PaymentHistoryService {
 ```
 # 결제 (payment) 서비스를 잠시 내려놓음
 
-#주문처리 #Fail
+#주문처리
 http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
 
 ```
@@ -319,7 +319,7 @@ http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
 cd musical/payment
 mvn spring-boot:run
 
-#주문처리 #Success
+#주문처리 
 http localhost:8081/orders name=Ho seatType=bclass cardNo=789 guest=4
 ```
 
@@ -391,17 +391,16 @@ reservation 시스템은 order/payment와 완전히 분리되어있으며, 이�
 # 예약 서비스 (reservation) 를 잠시 내려놓음
 
 # 주문 처리
-http localhost:8081/orders name=Jin seatType=cclass cardNo=135 guest=1  #Success
+http localhost:8081/orders name=Jin seatType=cclass cardNo=135 guest=1
 ```
 
 ![image](https://user-images.githubusercontent.com/87048550/131832179-cc2b1bb7-6cd4-40c0-8554-8dd2408f0609.png)
 
 ```
 # 예약상태 확인
-http localhost:8084/mypages/4  # 예약상태 안바뀜 확인     
+http localhost:8084/mypages/2    
 ```
-
-![image](https://user-images.githubusercontent.com/87048550/131832660-b6d945cd-0a45-4d3b-9ef5-d6c0e8f15d83.png)
+![image](https://user-images.githubusercontent.com/87048550/131938688-47d2b363-3f50-4030-8e42-79f399456532.png)
 
 ```
 # reservation 서비스 기동
@@ -409,10 +408,9 @@ cd musical/reservation
 mvn spring-boot:run 
 
 # 예약상태 확인
-http localhost:8084/mypages/4   # 예약상태가 "Reservation Complete"로 확인
+http localhost:8084/mypages/2  
 ```
-
-![image](https://user-images.githubusercontent.com/87048550/131832791-04576034-9cb7-452b-a172-7e332f2da38f.png)
+![image](https://user-images.githubusercontent.com/87048550/131938758-5baa606f-59ce-4561-98db-5d981771b47a.png)
 
 ## API 게이트웨이(gateway)
 
